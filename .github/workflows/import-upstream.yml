@@ -6,7 +6,7 @@ permissions:
   contents: write
 jobs:
   import:
-    if: github.event.head_commit.message == 'Add upstream import workflow'
+    if: github.event.head_commit.message == 'Fix upstream import workflow'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +18,9 @@ jobs:
           curl -L --fail "https://github.com/pedrozanela/Databricks-Master-Training/archive/refs/heads/main.zip" -o "$tmp/upstream.zip"
           unzip -q "$tmp/upstream.zip" -d "$tmp"
           src="$tmp/Databricks-Master-Training-main"
-          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          cp -a "$src"/. .
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github -exec rm -rf {} +
+          find .github -mindepth 1 -maxdepth 1 ! -name workflows -exec rm -rf {} + 2>/dev/null || true
+          rsync -a --exclude='.github/workflows/' "$src"/ ./
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
